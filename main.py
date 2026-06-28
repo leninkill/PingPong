@@ -1,8 +1,30 @@
 import arcade
 
+SCREEN_WIDTH = 600
+SCREEN_HEIGHT = 600
+SCREEN_TITLE = "АОК"
+
+SPEED_X = 5
+SPEED_Y = 5
+
+class Bar(arcade.Sprite):
+    def update(self):
+        self.center_x += self.change_x
+        if self.right > SCREEN_WIDTH:
+            self.right = SCREEN_WIDTH
+        if self.left < 0:
+            self.left = 0
+
 class Ball(arcade.Sprite):
     def update(self):
-        self.center_x += 1
+        self.center_x += self.change_x
+        self.center_y += self.change_y
+
+        if self.right > SCREEN_WIDTH or self.left < 0:
+            self.change_x = -self.change_x
+
+        if self.top > SCREEN_HEIGHT or self.bottom < 0:
+            self.change_y = -self.change_y
 
 class Gay(arcade.Window):
     def __init__(self, width, height, title):
@@ -42,9 +64,13 @@ class Gay(arcade.Window):
         self.shape_list.append(rect_top)
 
         self.ball = Ball("ball.png", 0.1)
-        self.ball.center_x = 300
-        self.ball.center_y = 300
+        self.bar = Bar("bar.png", 0.1)
 
+    def on_key_press(self, key, modifiers):
+        if key == arcade.key.LEFT:
+            self.bar.change_x = -SPEED_X
+        if key == arcade.key.RIGHT:
+            self.bar.change_x += SPEED_X
 
     def on_draw(self):
         arcade.start_render()
@@ -53,11 +79,23 @@ class Gay(arcade.Window):
         self.shape_list.draw()
 
         self.ball.draw()
+        self.bar.draw()
 
     def update(self, delta_time: float):
         self.ball.update()
+        self.bar.update()
+
+    def setup(self):
+        self.ball.center_x = SCREEN_WIDTH / 2
+        self.ball.center_y = SCREEN_HEIGHT / 2
+        self.ball.change_x = SPEED_X
+        self.ball.change_y = SPEED_Y
+
+        self.bar.center_x = SCREEN_WIDTH / 2
+        self.bar.center_y = 20
 
 
-window = Gay(600, 600, "ПИВО ЛЬЕТСЯ ЧЕРЕЗ КРАЙ СПИРИТЫ ЕБУТ КИТАЙ")
+window = Gay(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+window.setup()
 
 arcade.run()
