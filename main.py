@@ -2,10 +2,11 @@ import arcade
 
 SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 600
-SCREEN_TITLE = "АОК"
+SCREEN_TITLE = "Пинг-понг от Чака"
 
 SPEED_X = 5
 SPEED_Y = 5
+
 
 class Bar(arcade.Sprite):
     def update(self):
@@ -14,6 +15,7 @@ class Bar(arcade.Sprite):
             self.right = SCREEN_WIDTH
         if self.left < 0:
             self.left = 0
+
 
 class Ball(arcade.Sprite):
     def update(self):
@@ -26,64 +28,73 @@ class Ball(arcade.Sprite):
         if self.top > SCREEN_HEIGHT or self.bottom < 0:
             self.change_y = -self.change_y
 
+
 class Gay(arcade.Window):
     def __init__(self, width, height, title):
         super().__init__(width, height, title)
 
-        # 1. Создаем контейнер для фигур
         self.shape_list = arcade.ShapeElementList()
 
-        # Определяем цвета (RGB)
-        color_top = (255, 255, 255)  # Белый
-        color_mid = (0, 0, 255)  # Синий
-        color_bottom = (255, 0, 0)  # Красный
+        color_top = (40, 40, 80)
+        color_mid = (20, 20, 60)
+        color_bottom = (10, 10, 30)
 
-        # Находим координату Y для середины экрана
         mid_y = height / 2
 
-        # --- 2. НИЖНЯЯ ПОЛОВИНА ОKНА (От Красного к Синему) ---
         bottom_points = (
-            (0, 0),  # Нижний левый
-            (width, 0),  # Нижний правый
-            (width, mid_y),  # Средний правый
-            (0, mid_y)  # Средний левый
+            (0, 0),
+            (width, 0),
+            (width, mid_y),
+            (0, mid_y)
         )
         bottom_colors = (color_bottom, color_bottom, color_mid, color_mid)
         rect_bottom = arcade.create_rectangle_filled_with_colors(bottom_points, bottom_colors)
         self.shape_list.append(rect_bottom)
 
-        # --- 3. ВЕРХНЯЯ ПОЛОВИНА ОКНА (От Синего к Белому) ---
         top_points = (
-            (0, mid_y),  # Средний левый
-            (width, mid_y),  # Средний правый
-            (width, height),  # Верхний правый
-            (0, height)  # Верхний левый
+            (0, mid_y),
+            (width, mid_y),
+            (width, height),
+            (0, height)
         )
         top_colors = (color_mid, color_mid, color_top, color_top)
         rect_top = arcade.create_rectangle_filled_with_colors(top_points, top_colors)
         self.shape_list.append(rect_top)
 
-        self.ball = Ball("ball.png", 0.1)
-        self.bar = Bar("bar.png", 0.1)
+        self.ball = Ball("ball.png", 0.15)
+        self.bar = Bar("bar.png", 0.2)
+
+        self.ball.color = (100, 150, 255, 200)
+        self.bar.color = (80, 80, 200, 200)
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.LEFT:
             self.bar.change_x = -SPEED_X
         if key == arcade.key.RIGHT:
-            self.bar.change_x += SPEED_X
+            self.bar.change_x = SPEED_X
+
+    def on_key_release(self, symbol: int, modifiers: int):
+        if symbol == arcade.key.LEFT or symbol == arcade.key.RIGHT:
+            self.bar.change_x = 0
 
     def on_draw(self):
         arcade.start_render()
 
-        # 4. Отрисовываем обе половины за один вызов
         self.shape_list.draw()
 
         self.ball.draw()
         self.bar.draw()
 
+        arcade.draw_text("Пинг-понг от Чака", SCREEN_WIDTH - 200, SCREEN_HEIGHT - 30,
+                         (100, 100, 200), 16, font_name="Arial",
+                         bold=True)
+
     def update(self, delta_time: float):
         self.ball.update()
         self.bar.update()
+
+        if arcade.check_for_collision(self.ball, self.bar):
+            self.ball.change_y = -self.ball.change_y
 
     def setup(self):
         self.ball.center_x = SCREEN_WIDTH / 2
