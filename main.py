@@ -1,4 +1,5 @@
 import arcade
+import random
 
 SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 600
@@ -67,15 +68,23 @@ class Gay(arcade.Window):
         self.ball.color = (100, 150, 255, 200)
         self.bar.color = (80, 80, 200, 200)
 
+        self.score = 0
+
+        self.attempts = 3
+
+        self.game = True
+
     def on_key_press(self, key, modifiers):
-        if key == arcade.key.LEFT:
-            self.bar.change_x = -SPEED_X
-        if key == arcade.key.RIGHT:
-            self.bar.change_x = SPEED_X
+        if self.game == True:
+            if key == arcade.key.LEFT:
+                self.bar.change_x = -SPEED_X
+            if key == arcade.key.RIGHT:
+                self.bar.change_x = SPEED_X
 
     def on_key_release(self, symbol: int, modifiers: int):
-        if symbol == arcade.key.LEFT or symbol == arcade.key.RIGHT:
-            self.bar.change_x = 0
+        if self.game == True:
+            if symbol == arcade.key.LEFT or symbol == arcade.key.RIGHT:
+                self.bar.change_x = 0
 
     def on_draw(self):
         arcade.start_render()
@@ -88,10 +97,20 @@ class Gay(arcade.Window):
         arcade.draw_text("Пинг-понг от Чака", SCREEN_WIDTH - 200, SCREEN_HEIGHT - 30,
                          (100, 100, 200), 16, font_name="Arial",
                          bold=True)
+        arcade.draw_text(f"Счёт: {self.score}", 20, SCREEN_HEIGHT - 30, (100, 100, 200), 16, font_name="Arial", bold=True)
+        arcade.draw_text(f"Попытки: {self.attempts}", 20, SCREEN_HEIGHT - 50, (100, 100, 200), 16, font_name="Arial", bold=True)
+        if self.attempts == 0:
+            arcade.draw_text("ПРОИГРЫШ", 0, SCREEN_HEIGHT / 2, (138, 107, 156), 50, SCREEN_WIDTH, "center", font_name="Arial", bold=True)
+        if self.score == 10:
+            arcade.draw_text("ВЫИГРЫШ", 0, SCREEN_HEIGHT / 2, (138, 107, 156), 50, SCREEN_WIDTH, "center", font_name="Arial", bold=True)
+            self.ball.stop()
+            self.bar.stop()
+            self.game = False
 
     def update(self, delta_time: float):
-        self.ball.update()
-        self.bar.update()
+        if self.game == True:
+            self.ball.update()
+            self.bar.update()
 
         if arcade.check_for_collision(self.ball, self.bar):
             self.ball.change_y = -self.ball.change_y
